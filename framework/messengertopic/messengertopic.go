@@ -1,4 +1,4 @@
-package framework
+package messengertopic
 
 // Callback function type for MessengerTopic
 type EventCallbackFunction func(data *Message, topic *messengerTopic)
