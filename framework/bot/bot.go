@@ -32,13 +32,13 @@ type Bot struct {
 }
 
 // Create a new Bot instance
-func New(name string, logEnabled bool) Bot {
+func New(name string, logEnabled bool) *Bot {
 	bot := Bot{
 		Name:       name,
 		commands:   make(map[string]CommandFunction),
 		logEnabled: logEnabled,
 	}
-	return bot
+	return &bot
 }
 
 // Initialise the Bot instance
