@@ -11,11 +11,11 @@ type dependency struct {
 }
 
 // Create new instance of dependency, initially set to not-ready state
-func New() dependency {
+func New() *dependency {
 	var dep dependency
 	// Initially increment WaitGroup so that all calls to Await() will lock
 	dep.waiter.Add(1)
-	return dep
+	return &dep
 }
 
 // Wait for dependency to be marked as ready
