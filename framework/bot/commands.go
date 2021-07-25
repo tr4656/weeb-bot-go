@@ -6,8 +6,11 @@ import (
 
 // Arguments provided to CommandFunctions
 type CommandArguments struct {
-	Message   *discordgo.Message
-	Command   string
+	// Discord Message object corresponding to the command
+	Message *discordgo.Message
+	// Command alias used to call the command
+	Command string
+	// Slice of arguments passed in space separated to the command
 	Arguments []string
 }
 
@@ -16,6 +19,6 @@ type CommandFunction func(b *Bot, cmd *CommandArguments)
 
 // Interface that provides a handlable command
 type CommandProvider interface {
-	// Provides and alias and a command
+	// Provides a list of aliases and a command
 	ProvideCommand() (aliases []string, handler CommandFunction)
 }
