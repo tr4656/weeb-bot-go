@@ -19,12 +19,13 @@ func New() dependency {
 }
 
 // Wait for dependency to be marked as ready
-// Should run immediately if dependency is already ready
+// Should return immediately if dependency is already ready
 func (dep *dependency) Await() {
 	dep.waiter.Wait()
 }
 
 // Mark dependency as ready, run all waiting functions
+// Should NOT be called more than once
 func (dep *dependency) Ready() {
 	// Decrement WaitGroup to 0, permanently allowing waiting functions
 	dep.waiter.Done()
