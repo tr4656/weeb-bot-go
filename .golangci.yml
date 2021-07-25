@@ -1,0 +1,34 @@
+run:
+  timeout: 5m
+
+linters:
+  enable:
+    - deadcode
+    - exportloopref
+    - gocritic
+    - gofmt
+    - goimports
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unconvert
+    - varcheck
+  disable-all: true
+
+linters-settings:
+  gocritic:
+    disabled-checks:
+      - ifElseChain # This felt like a wash. Long switch statements don't seem particularly better personally.
+      - captLocal # Violates https://github.com/golang/go/wiki/CodeReviewComments#initialisms enforced by golint.
+      - dupCase # Violates https://github.com/golang/go/wiki/CodeReviewComments#initialisms enforced by golint.
+
+issues:
+  exclude-rules:
+    # Exclude scopelint from running on tests files.
+    - path: _test\.go
+      linters:
+        - scopelint
