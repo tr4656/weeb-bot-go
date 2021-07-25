@@ -1,4 +1,4 @@
-package bot
+package defaultcommands
 
 import (
 	"strings"
@@ -9,7 +9,7 @@ import (
 // Command to sent a help message
 type HelpCommand struct {
 	// Help message string to send on command
-	helpMessage string
+	HelpMessage string
 }
 
 func (h *HelpCommand) ProvideCommand() ([]string, bot.CommandFunction) {
@@ -23,5 +23,5 @@ func (h *HelpCommand) handleHelp(b *bot.Bot, cmd *bot.CommandArguments) {
 		return
 	}
 
-	b.Session.ChannelMessageSend(cmd.Message.ChannelID, h.helpMessage)
+	b.Session.ChannelMessageSend(cmd.Message.ChannelID, h.HelpMessage)
 }
