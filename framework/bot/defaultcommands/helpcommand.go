@@ -19,7 +19,7 @@ func (h *HelpCommand) ProvideCommand() ([]string, bot.CommandFunction) {
 func (h *HelpCommand) handleHelp(b *bot.Bot, cmd *bot.CommandArguments) {
 	// Ensure the sole argument to the command is the bot name
 	if len(cmd.Arguments) == 0 ||
-		strings.EqualFold(cmd.Arguments[0], b.Name) {
+		!strings.EqualFold(cmd.Arguments[0], b.Name) {
 		return
 	}
 
