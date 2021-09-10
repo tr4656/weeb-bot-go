@@ -7,15 +7,16 @@ import (
 // Wrapper around WaitGroups to facilitate waiting on dependencies to be ready
 type dependency struct {
 	// WaitGroup used internally to store and manage the ready state
-	waiter sync.WaitGroup
+	waiter *sync.WaitGroup
 }
 
 // Create new instance of dependency, initially set to not-ready state
-func New() *dependency {
+func New() dependency {
 	var dep dependency
+	dep.waiter = &sync.WaitGroup{}
 	// Initially increment WaitGroup so that all calls to Await() will lock
 	dep.waiter.Add(1)
-	return &dep
+	return dep
 }
 
 // Wait for dependency to be marked as ready
