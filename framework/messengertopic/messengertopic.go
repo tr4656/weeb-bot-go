@@ -1,7 +1,7 @@
 package messengertopic
 
 // Callback function type for MessengerTopic
-type EventCallbackFunction func(data *Message, topic *messengerTopic)
+type EventCallbackFunction func(data *Message)
 
 // Subscribable messaging bus
 // Allows data traffic between distinct parts of code
@@ -38,6 +38,6 @@ func (topic *messengerTopic) Unsubscribe(subscriberId string) {
 func (topic *messengerTopic) Notify(data *Message) {
 	topic.LastData = data
 	for _, f := range topic.subscribers {
-		go f(data, topic)
+		go f(data)
 	}
 }
