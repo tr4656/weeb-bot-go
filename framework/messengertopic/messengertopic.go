@@ -16,11 +16,11 @@ type messengerTopic struct {
 type Message interface{}
 
 // Create new instance of messengerTopic
-func New() *messengerTopic {
+func New() messengerTopic {
 	topic := messengerTopic{
 		subscribers: make(map[string]EventCallbackFunction),
 	}
-	return &topic
+	return topic
 }
 
 // Subscribe to topic with a given an identifier and a callback function
