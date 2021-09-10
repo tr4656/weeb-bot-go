@@ -8,17 +8,16 @@ import (
 type CommandArguments struct {
 	// Discord Message object corresponding to the command
 	Message *discordgo.Message
-	// Command alias used to call the command
-	Command string
+	// CommandName alias used to call the command
+	CommandName string
 	// Slice of arguments passed in space separated to the command
 	Arguments []string
 }
 
-// Function to handle a particular command on Bot
-type CommandFunction func(b *Bot, cmd *CommandArguments)
-
 // Interface that provides a handlable command
-type CommandProvider interface {
+type Command interface {
 	// Provides a list of aliases and a command
-	ProvideCommand() (aliases []string, handler CommandFunction)
+	ProvideAliases() (aliases []string)
+	ProvideHelpMessage() (helpMessage string)
+	Handle() (session *discordgo.Session, cmd CommandArguments)
 }

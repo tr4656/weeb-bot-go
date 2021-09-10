@@ -8,23 +8,25 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-var commandSyntax = regexp.MustCompile(`^\s*!([A-Za-z]+)((?: +[^ ]+)+)?\s*$`)
-var repeatedSpaces = regexp.MustCompile(" +")
+var (
+	commandSyntax  = regexp.MustCompile(`^\s*!([A-Za-z]+)((?: +[^ ]+)+)?\s*$`)
+	repeatedSpaces = regexp.MustCompile(" +")
+)
 
 // Simple discord bot
 // Provided command handlers, the bot will pass commands of a matching alias to the handler functions
 type Bot struct {
 	// Bot name - used for logging and for commands to recognise reference to the bot itself
 	Name string
+	// Help message on the bot level
+	botHelpMessage string
 	// Discord Session instance - null until Init() is called
-	Session *discordgo.Session
+	session *discordgo.Session
 
-	// Slice of all CommandProvider interfaces to use on Init()
-	commandProviders []CommandProvider
 	// Slice of all Discord event functions to add as handlers to the Session on Init()
 	customEventHandlers []interface{}
-	// Map of all aliases to their corresponding handler functions
-	commands map[string]CommandFunction
+	// Map of all aliases to their corresponding handlers
+	commands map[string]Command
 
 	// Whether to log error messages to discord or not
 	// TODO: Implement usage
@@ -32,10 +34,10 @@ type Bot struct {
 }
 
 // Create a new Bot instance
-func New(name string, logEnabled bool) *Bot {
+func New(name string, botHelpMessage string, logEnabled bool) *Bot {
 	bot := Bot{
 		Name:       name,
-		commands:   make(map[string]CommandFunction),
+		commands:   make(map[string]Command),
 		logEnabled: logEnabled,
 	}
 	return &bot
@@ -46,15 +48,14 @@ func New(name string, logEnabled bool) *Bot {
 // Returns errors from discordgo
 func (b *Bot) Init(token string) error {
 	var err error
-	b.Session, err = discordgo.New("Bot " + token)
+	b.session, err = discordgo.New("Bot " + token)
 	if err != nil {
 		return err
 	}
 
-	b.initCommands()
 	b.initEventHandlers()
 
-	err = b.Session.Open()
+	err = b.session.Open()
 	if err != nil {
 		return err
 	}
@@ -62,32 +63,37 @@ func (b *Bot) Init(token string) error {
 	return nil
 }
 
-// Initialise all commands
-// Gets all commands from assigned providers and generates a map lookup to handler functions
-func (b *Bot) initCommands() {
-	for _, provider := range b.commandProviders {
-		aliases, handler := provider.ProvideCommand()
-		for _, alias := range aliases {
-			b.commands[strings.ToLower(alias)] = handler
-		}
-	}
-}
-
 // Initialise all event handlers
 // Add default handlers for Ready and CreateMessage, then all assigned custom handlers
 // Will print a message if an invalid handler is present in in customEventHandlers
 func (b *Bot) initEventHandlers() {
-	b.Session.AddHandlerOnce(b.handleReady)
-	b.Session.AddHandler(b.handleMessage)
+	b.session.AddHandlerOnce(b.handleReady)
+	b.session.AddHandler(b.handleMessage)
 
 	for _, handler := range b.customEventHandlers {
-		b.Session.AddHandler(handler)
+		b.session.AddHandler(handler)
 	}
 }
 
-// Add a command in the form of a CommandProvider
-func (b *Bot) AddCommand(provider CommandProvider) {
-	b.commandProviders = append(b.commandProviders, provider)
+// Generates a help message from commands loaded in
+func (b *Bot) GenerateHelpMessage() string {
+	helpMessage := b.botHelpMessage
+
+	helpMessage += "\n\n"
+
+	for _, command := range b.commands {
+		helpMessage += command.ProvideHelpMessage() + "\n"
+	}
+
+	return helpMessage
+}
+
+// Add a command to the commands map
+func (b *Bot) AddCommand(command Command) {
+	aliases := command.ProvideAliases()
+	for _, alias := range aliases {
+		b.commands[strings.ToLower(alias)] = command
+	}
 }
 
 // Add an event handler in the form of a Discord event handling function
@@ -110,7 +116,8 @@ func (b *Bot) handleMessage(s *discordgo.Session, e *discordgo.MessageCreate) {
 	// If successfully parsed, run appropriate handler function with parsed args
 	cmdArgs := b.parseCommand(e.Message)
 	if cmdArgs != nil {
-		b.commands[cmdArgs.Command](b, cmdArgs)
+		handler := b.commands[cmdArgs.CommandName]
+		handler.Handle(b.session, cmdArgs)
 	}
 }
 
@@ -137,8 +144,8 @@ func (b *Bot) parseCommand(message *discordgo.Message) *CommandArguments {
 	}
 
 	return &CommandArguments{
-		Message:   message,
-		Command:   strings.ToLower(m[1]), // Command alias is returned as lowercase string for consistency
-		Arguments: args,
+		Message:     message,
+		CommandName: strings.ToLower(m[1]), // Command alias is returned as lowercase string for consistency
+		Arguments:   args,
 	}
 }
