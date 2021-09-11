@@ -24,12 +24,14 @@ func (h *HelpCommand) ProvideHelpMessage() string {
 	return ""
 }
 
-func (h *HelpCommand) Handle(session *discordgo.Session, cmd bot.CommandArguments) {
+func (h *HelpCommand) Handle(session *discordgo.Session, cmd bot.CommandArguments) error {
 	// Ensure the sole argument to the command is the bot name
 	if len(cmd.Arguments) == 0 ||
 		!strings.EqualFold(cmd.Arguments[0], h.BotName) {
-		return
+		// No error here, just that we don't do anything instead
+		return nil
 	}
 
-	session.ChannelMessageSend(cmd.Message.ChannelID, h.HelpMessage)
+	_, err := session.ChannelMessageSend(cmd.Message.ChannelID, h.HelpMessage)
+	return err
 }

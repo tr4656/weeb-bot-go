@@ -117,7 +117,12 @@ func (b *Bot) handleMessage(s *discordgo.Session, e *discordgo.MessageCreate) {
 	cmdArgs := b.parseCommand(e.Message)
 	if cmdArgs.CommandName != "" {
 		handler := b.commands[cmdArgs.CommandName]
-		handler.Handle(b.session, cmdArgs)
+		err := handler.Handle(b.session, cmdArgs)
+
+		if err != nil {
+			// TODO: Log better
+			fmt.Printf("Error handling command '%s': %s\n", cmdArgs.CommandName, err)
+		}
 	}
 }
 
