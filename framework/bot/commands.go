@@ -19,5 +19,5 @@ type Command interface {
 	// Provides a list of aliases and a command
 	ProvideAliases() (aliases []string)
 	ProvideHelpMessage() (helpMessage string)
-	Handle() (session *discordgo.Session, cmd CommandArguments)
+	Handle(session *discordgo.Session, cmd CommandArguments) error
 }

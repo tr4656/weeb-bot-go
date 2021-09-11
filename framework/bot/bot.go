@@ -113,25 +113,25 @@ func (b *Bot) handleMessage(s *discordgo.Session, e *discordgo.MessageCreate) {
 		return
 	}
 
-	// If successfully parsed, run appropriate handler function with parsed args
+	// If successfully parsed, run appropriate handler with parsed args
 	cmdArgs := b.parseCommand(e.Message)
-	if cmdArgs != nil {
+	if cmdArgs.CommandName != "" {
 		handler := b.commands[cmdArgs.CommandName]
 		handler.Handle(b.session, cmdArgs)
 	}
 }
 
 // Parse arguments in the provided message
-// Returns arguments if successfully parsed, otherwise returns nil
-func (b *Bot) parseCommand(message *discordgo.Message) *CommandArguments {
+// Returns populated arguments if successfully parsed, otherwise returns empty arguments
+func (b *Bot) parseCommand(message *discordgo.Message) CommandArguments {
 	// Ensure message matches commnd syntax
 	m := commandSyntax.FindStringSubmatch(message.Content)
 	if m == nil {
-		return nil
+		return CommandArguments{}
 	}
 	// Ensure command alias in message is present in commands lookup
 	if _, exists := b.commands[strings.ToLower(m[1])]; !exists {
-		return nil
+		return CommandArguments{}
 	}
 
 	// If arguments are present, clean up spaces and split arguments into a slice
@@ -143,7 +143,7 @@ func (b *Bot) parseCommand(message *discordgo.Message) *CommandArguments {
 		args = strings.Split(argString, " ")
 	}
 
-	return &CommandArguments{
+	return CommandArguments{
 		Message:     message,
 		CommandName: strings.ToLower(m[1]), // Command alias is returned as lowercase string for consistency
 		Arguments:   args,
